@@ -52,7 +52,7 @@ bilderCss(projectDirectory);
 
 /*создаем html и копируем в него данные из template с заменой тегов*/ 
 
-fs.mkdir(path.join(__dirname, 'project-dist'), { recursive: true }, (err) => {
+fs.mkdir(projectDirectory, { recursive: true }, (err) => {
   if (err) throw err;
 });
 
@@ -61,12 +61,11 @@ const templateHtml = fs.createReadStream(path.join(templateFile), 'utf-8');
 
 templateHtml.on('data', (data) => {
   let html = data.toString();
-  const regularTags = html.match(/{{(.*)}}/gi);
-  Promise.all(regularTags.map((item) => {
-    const tagNameFile = item.substr(2, (item.length-4));
-    return fsPromises.readFile(path.join(componentsFile, `${tagNameFile}.html`)).then((component) => html = html.replace(item, component.toString()));   
+  const tags = html.match(/{{(.*)}}/gi);
+  Promise.all(tags.map(async (item) => {
+    const tagsName = item.substr(2, (item.length-4));
+    const component = await fsPromises.readFile(path.join(componentsFile, `${tagsName}.html`));
+    return html = html.replace(item, component.toString());   
   })).then(() => indexHtml.write(html));
 });
-
-
 
