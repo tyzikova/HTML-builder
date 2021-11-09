@@ -1,6 +1,16 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+fs.readdir(path.join(__dirname, 'files-copy'), (err, data) => {
+  if (data) {
+    data.forEach((file) => {
+      fs.unlink(path.join(__dirname, 'files-copy', file), (err) => {
+        if (err) throw err;
+      });
+    });
+  }
+});
+
 async function copyDir(){
   const file = path.join(__dirname, 'files');
   const copyFolder = path.join(__dirname, 'files-copy');
@@ -9,12 +19,12 @@ async function copyDir(){
   const items = await fs.readdir(file, {withFileTypes: true}, (err) => {
     if(err) process.stdout.write(err);
   });
-  for (let i = 0; i< items.length; i++){
+  for (let i = 0; i < items.length; i++){
     const from = path.join(file, items[i].name);
     const to = path.join(copyFolder, items[i].name);
-    if(!items[i].isDirectory()){
-      fs.copyFile(from, to);
-    }
+    fs.copyFile(from, to, (err) => {
+      if (err) process.stdout.write(err);
+    });
   }
 }
 copyDir();
